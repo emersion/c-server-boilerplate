@@ -9,21 +9,29 @@
 #include <pthread.h>
 
 #define PORT 9600
-#define BUF_SIZE 100
+#define BUF_SIZE 128
 #define SERVER_BACKLOG 10
 
 void *handle_conn(void *arg) {
 	int conn_fd = *((int*) arg);
 
 	char buf[BUF_SIZE];
-	ssize_t n = read(conn_fd, &buf, sizeof(buf));
-	if (n < 0) {
-		fprintf(stderr, "Error while reading from connection\n");
-		return NULL;
+	ssize_t n;
+	while (1) {
+		n = read(conn_fd, &buf, sizeof(buf)-1);
+		if (n < 0) {
+			fprintf(stderr, "Error while reading from connection\n");
+			return NULL;
+		}
+		if (n == 0) {
+			break;
+		}
+		buf[n] = '\0';
+
+		printf("Received: %s\n", buf);
 	}
 
-	printf("Received: %s\n", buf);
-
+	printf("Closing connection\n");
 	int err = close(conn_fd);
 	if (err != 0) {
 		fprintf(stderr, "Error while closing connection\n");
@@ -71,6 +79,8 @@ int main(int argc, char *argv[]) {
 			fprintf(stderr, "Cannot accept\n");
 			return 1;
 		}
+
+		printf("New client\n");
 
 		err = pthread_create(&thread, NULL, &handle_conn, (void*) &client_fd);
 		if (err != 0) {
