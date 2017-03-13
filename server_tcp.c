@@ -20,7 +20,7 @@ void *handle_conn(void *arg) {
 	while (1) {
 		n = read(conn_fd, &buf, sizeof(buf)-1);
 		if (n < 0) {
-			fprintf(stderr, "Error while reading from connection\n");
+			fprintf(stderr, "Error while reading from connection [%d]\n", conn_fd);
 			return NULL;
 		}
 		if (n == 0) {
@@ -28,13 +28,13 @@ void *handle_conn(void *arg) {
 		}
 		buf[n] = '\0';
 
-		printf("Received: %s\n", buf);
+		printf("Received [%d]: %s\n",conn_fd,  buf);
 	}
 
-	printf("Closing connection\n");
+	printf("Closing connection [%d]\n",conn_fd);
 	int err = close(conn_fd);
 	if (err != 0) {
-		fprintf(stderr, "Error while closing connection\n");
+		fprintf(stderr, "Error while closing connection [%d]\n", conn_fd);
 	}
 	return NULL;
 }
@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
 			return 1;
 		}
 
-		printf("New client\n");
+		printf("New client [%d]\n", client_fd);
 
 		err = pthread_create(&thread, NULL, &handle_conn, (void*) &client_fd);
 		if (err != 0) {
