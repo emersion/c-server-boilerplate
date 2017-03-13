@@ -7,8 +7,10 @@
 #include <string.h>
 #include <arpa/inet.h>
 
+#include "util.c"
+
 #define PORT 9600
-#define BUF_SIZE 100
+#define BUF_SIZE 128
 
 int main(int argc, char *argv[]) {
 	int client_fd = socket(PF_INET, SOCK_DGRAM, 0);
@@ -32,13 +34,34 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	char *msg = "Hello World!";
-	ssize_t n = write(client_fd, msg, strlen(msg)+1);
-	if (n < 0) {
-		fprintf(stderr, "Cannot write data\n");
+	printf("Type messages to send to the server. End with an empty message.\n");
+
+	while (1) {
+		char buf[BUF_SIZE];
+		ssize_t n = freadln(stdin, buf, sizeof(buf));
+		if (n < 0) {
+			fprintf(stderr, "Cannot read message to send from stdin\n");
+			return 1;
+		}
+		if (strcmp(buf, "") == 0) {
+			break;
+		}
+
+		ssize_t written = write(client_fd, buf, n+1);
+		if (written < 0) {
+			fprintf(stderr, "Cannot write data\n");
+			return 1;
+		}
+
+		printf("Sent: %s\n", buf);
+	}
+
+	printf("Closing connection\n");
+	err = close(client_fd);
+	if (err != 0) {
+		fprintf(stderr, "Error while closing connection\n");
 		return 1;
 	}
 
-	printf("Message sent!\n");
 	return 0;
 }

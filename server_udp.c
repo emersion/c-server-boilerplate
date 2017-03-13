@@ -8,7 +8,7 @@
 #include <arpa/inet.h>
 
 #define PORT 9600
-#define BUF_SIZE 100
+#define BUF_SIZE 128
 
 int main(int argc, char *argv[]) {
 	int server_fd = socket(PF_INET, SOCK_DGRAM, 0);
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 	struct sockaddr_in client_addr;
 	socklen_t client_addr_len;
 	while (1) {
-		n = recvfrom(server_fd, &buf, sizeof(buf), 0, (struct sockaddr *) &client_addr, &client_addr_len);
+		n = recvfrom(server_fd, &buf, sizeof(buf)-1, 0, (struct sockaddr *) &client_addr, &client_addr_len);
 		if (n < 0) {
 			fprintf(stderr, "Cannot read from socket\n");
 			return 1;
@@ -47,6 +47,7 @@ int main(int argc, char *argv[]) {
 		if (n == 0) {
 			continue; // EOF
 		}
+		buf[n] = '\0';
 
 		printf("Received: %s\n", buf);
 	}

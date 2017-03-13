@@ -7,31 +7,10 @@
 #include <string.h>
 #include <arpa/inet.h>
 
+#include "util.c"
+
 #define PORT 9600
 #define BUF_SIZE 12
-
-ssize_t freadln(FILE *stream, char *buf, size_t max) {
-	size_t n = 0;
-	while (1) {
-		if (n+1 >= max) {
-			buf[n] = '\0';
-			return n;
-		}
-
-		int ch = fgetc(stream);
-		if (ch == EOF) {
-			return n;
-		} else if (ch < 0) {
-			return ch;
-		} else if (ch == '\r' || ch == '\n') {
-			buf[n] = '\0';
-			return n+1;
-		} else {
-			buf[n] = (char) ch;
-			n++;
-		}
-	}
-}
 
 int main(int argc, char *argv[]) {
 	int client_fd = socket(PF_INET, SOCK_STREAM, 0);
@@ -64,7 +43,7 @@ int main(int argc, char *argv[]) {
 			fprintf(stderr, "Cannot read message to send from stdin\n");
 			return 1;
 		}
-		if (n == 0) {
+		if (strcmp(buf, "") == 0) {
 			break;
 		}
 
