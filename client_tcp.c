@@ -7,8 +7,6 @@
 #include <string.h>
 #include <arpa/inet.h>
 
-#include "util.c"
-
 #define PORT 9600
 #define BUF_SIZE 12
 
@@ -34,20 +32,16 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	printf("Type messages to send to the server. End with an empty message.\n");
+	printf("Type messages to send to the server. End with Ctrl+D.\n");
 
 	while (1) {
 		char buf[BUF_SIZE];
-		ssize_t n = freadln(stdin, buf, sizeof(buf));
-		if (n < 0) {
-			fprintf(stderr, "Cannot read message to send from stdin\n");
-			return 1;
-		}
-		if (strcmp(buf, "") == 0) {
+		char *res = fgets(buf, sizeof(buf), stdin);
+		if (res == NULL) {
 			break;
 		}
 
-		ssize_t written = write(client_fd, buf, n+1);
+		ssize_t written = write(client_fd, buf, strlen(buf)+1);
 		if (written < 0) {
 			fprintf(stderr, "Cannot write data\n");
 			return 1;

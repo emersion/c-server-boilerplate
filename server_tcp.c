@@ -28,7 +28,7 @@ void *handle_conn(void *arg) {
 		}
 		buf[n] = '\0';
 
-		printf("Received [%d]: %s\n",conn_fd,  buf);
+		printf("Received [%d]: %s\n", conn_fd,  buf);
 	}
 
 	printf("Closing connection [%d]\n",conn_fd);
